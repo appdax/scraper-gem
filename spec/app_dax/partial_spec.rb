@@ -2,10 +2,21 @@ RSpec.describe AppDax::Partial do
   let(:partial) { described_class.new data }
 
   describe '#available?' do
-    let(:data) { nil }
+    subject { partial.available? }
 
-    it('should be abstract') do
-      expect { partial.available? }.to raise_error(NotImplementedError)
+    context 'when data is nil' do
+      let(:data) { nil }
+      it { is_expected.to be_falsy }
+    end
+
+    context 'when data is empty' do
+      let(:data) { {} }
+      it { is_expected.to be_falsy }
+    end
+
+    context 'when data is provided' do
+      let(:data) { { k: 'v'} }
+      it { is_expected.to be_truthy }
     end
   end
 

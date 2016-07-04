@@ -28,7 +28,7 @@ module AppDax
     #
     # @return [ Boolean ] A true value means availability.
     def available?
-      raise NotImplementedError, 'unimplemented Method available?'
+      @data && !@data.empty?
     end
 
     # Call method equal to key and return the value.
