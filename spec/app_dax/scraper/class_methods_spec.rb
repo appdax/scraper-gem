@@ -1,3 +1,5 @@
+require 'fakefs/spec_helpers'
+
 RSpec.describe AppDax::Scraper do
   describe '::fields' do
     let(:value) { [:f1, :f2] }
@@ -290,6 +292,51 @@ RSpec.describe AppDax::Scraper do
       before { described_class.url_for_field(field) {} }
       subject { described_class.url_specs }
       it { is_expected.to include(field) }
+    end
+  end
+
+  describe '::config' do
+    subject { described_class.config }
+    it('should return an empty hash by default') { is_expected.to eq({}) }
+  end
+
+  describe '::load_config' do
+    include FakeFS::SpecHelpers
+
+    let(:load_config) { -> { described_class.load_config role: 'xyz' } }
+
+    before { described_class.instance_variable_set :@fields, nil }
+
+    context 'when file does not exist' do
+      it { expect { load_config.call }.to_not raise_error }
+    end
+
+    context 'when role does not exist' do
+      before do
+        FileUtils.mkdir 'config'
+        File.write 'config/scrape.yml', '{}'
+      end
+
+      it { expect { load_config.call }.to raise_error }
+    end
+
+    context 'when file and role exist' do
+      subject { described_class.config }
+
+      before do
+        FileUtils.mkdir 'config'
+        File.write 'config/scrape.yml', "xyz:\n  :fields:\n  - :f1"
+        load_config.call
+      end
+
+      it('should have read config') { is_expected.to include(:fields) }
+
+      context 'when config specified fields' do
+        describe '::fields' do
+          subject { described_class.fields }
+          it('should return them') { is_expected.to eq([:f1]) }
+        end
+      end
     end
   end
 end

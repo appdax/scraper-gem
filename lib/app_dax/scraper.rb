@@ -22,7 +22,7 @@ module AppDax
     include Gear
 
     delegate %w(fields drop_box stocks_per_request content_type
-                base_url process_timeout concurrent_requests
+                base_url process_timeout concurrent_requests config
                 parallel_requests serializer_class stock_class) => 'self.class'
 
     # Intialize the scraper and create the hydra and serializer

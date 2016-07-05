@@ -22,7 +22,7 @@ module AppDax
       # @return [ Scraper ]
       def fields(*fields)
         @fields   = fields.flatten if fields && fields.any?
-        @fields ||= []
+        @fields ||= config[:fields] || []
 
         fields && fields.any? ? self : @fields.dup
       end
@@ -43,7 +43,7 @@ module AppDax
       # @return [ Scraper ]
       def drop_box(path = nil)
         @drop_box   = path.to_s if path
-        @drop_box ||= 'tmp/stocks'
+        @drop_box ||= config[:drop_box] || 'tmp/stocks'
 
         path ? self : @drop_box.dup
       end
@@ -68,7 +68,7 @@ module AppDax
       # @return [ Scraper ]
       def content_type(type = nil)
         @content_type   = type if type
-        @content_type ||= :text
+        @content_type ||= config[:content_type] || :text
 
         case @content_type
         when :json       then require 'json'
@@ -94,7 +94,7 @@ module AppDax
       # @return [ Scraper ]
       def stocks_per_request(count = nil)
         @per_request   = count.to_i if count && count.to_i >= 1
-        @per_request ||= 1
+        @per_request ||= config[:stocks_per_request] || 1
 
         count ? self : @per_request
       end
@@ -116,7 +116,7 @@ module AppDax
       # @return [ Scraper ]
       def concurrent_requests(count = nil)
         @concurrent   = count.to_i if count && count.to_i >= 1
-        @concurrent ||= 200
+        @concurrent ||= config[:concurrent_requests] || 200
 
         count ? self : @concurrent
       end
@@ -138,7 +138,7 @@ module AppDax
       # @return [ Scraper ]
       def parallel_requests(count = nil)
         @parallel   = count.to_i if count && count.to_i >= 1
-        @parallel ||= 1
+        @parallel ||= config[:parallel_requests] || 1
 
         count ? self : @parallel
       end
@@ -161,7 +161,7 @@ module AppDax
       # @return [ Scraper ]
       def process_timeout(count = nil)
         @process_timeout   = count.to_i if count && count.to_i >= 1
-        @process_timeout ||= 20
+        @process_timeout ||= config[:process_timeout] || 20
 
         count ? self : @process_timeout
       end
@@ -181,7 +181,7 @@ module AppDax
       # @return [ Void ]
       def base_url(url = nil)
         @base_url   = url.to_s if url
-        @base_url ||= ''
+        @base_url ||= config[:base_url] || ''
 
         url ? self : @base_url.dup
       end
@@ -254,6 +254,25 @@ module AppDax
       # @return [ Hash ]
       def url_specs
         (@url_specs ||= {}).dup
+      end
+
+      # Load the config provided under config/scrape.yml for the specified role.
+      #
+      # @param [ String ] role The name of the role.
+      def load_config(role:)
+        return unless File.exist? 'config/scrape.yml'
+
+        require 'yaml'
+        @config = YAML.load_file('config/scrape.yml')[role]
+
+        raise "could not find role #{role} in config/scrape.yml" unless @config
+      end
+
+      # Config from config/scrape.yml
+      #
+      # @return [ Hash ]
+      def config
+        (@config ||= {}).dup
       end
     end
 
