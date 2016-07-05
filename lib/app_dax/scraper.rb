@@ -108,7 +108,7 @@ module AppDax
       filepath = File.join(drop_box, filename_for(stock))
       json     = @serializer.serialize(stock)
 
-      File.open(filepath, 'w+') { |io| io << json } if json
+      File.write(filepath, json) if json
     end
 
     protected
