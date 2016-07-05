@@ -191,7 +191,7 @@ module AppDax
     #
     # @return [ String ] A filename of a JSON file.
     def filename_for(stock)
-      "#{stock.isin}-#{SecureRandom.uuid}.json"
+      "#{stock.id}-#{SecureRandom.uuid}.json"
     end
   end
 end

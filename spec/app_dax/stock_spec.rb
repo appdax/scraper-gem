@@ -9,6 +9,23 @@ RSpec.describe AppDax::Stock do
     end
   end
 
+  describe '::id' do
+    subject { described_class.id }
+    after { described_class.id :isin }
+    it('should be :isin by default') { is_expected.to be(:isin) }
+
+    context 'when assigning an valid value' do
+      before { described_class.id :wkn }
+      it('should accept it') { is_expected.to be(:wkn) }
+    end
+
+    context 'when assigning an invalid value' do
+      it('should not accept it') do
+        expect { described_class.id :name }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
   describe '#available?' do
     let(:stock) { described_class.new(data) }
     subject { stock.available? }

@@ -66,7 +66,7 @@ RSpec.describe AppDax::Serializer do
       subject { JSON.load serializer.serialize(stock), symbolize_names: true }
 
       it('should include mandatory keys') do
-        is_expected.to include(*%w(source created_at basic version feeds))
+        is_expected.to include(*%w(id source created_at basic version feeds))
       end
     end
   end

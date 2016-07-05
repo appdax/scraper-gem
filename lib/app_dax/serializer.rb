@@ -72,13 +72,12 @@ module AppDax
 
       return nil if analyses.empty?
 
-      data = {
-        source: source,
-        created_at: Time.now.to_i,
-        version: 1,
-        basic: basic_data(stock),
-        feeds: analyses
-      }
+      data = { id: stock.class.id,
+               source: source,
+               created_at: Time.now.to_i,
+               version: 1,
+               basic: basic_data(stock),
+               feeds: analyses }
 
       JSON.fast_generate(data, symbolize_names: false)
     end

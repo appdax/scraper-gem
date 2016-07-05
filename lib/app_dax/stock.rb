@@ -14,10 +14,6 @@ module AppDax
   # @example Get todays performance.
   #   stock.intra.performance
   #   #=> -1.59
-  #
-  # @example Convert the stock into a JSON structure
-  #   stock.to_json
-  #   #=> "{...}"
   class Stock
     # An instance indicates one finance security.
     #
@@ -37,11 +33,50 @@ module AppDax
 
     alias exec instance_exec
 
+    # Accessor for the `id` property to specify the property that
+    # identifies the stock instance. It defaults to the ISIN number.
+    #
+    # @example Set the identifier property.
+    #   Stock.id :symbol
+    #   # => self
+    #
+    # @example Get the identifier property.
+    #   Stock.id
+    #   # => :smybol
+    #
+    # @example Get the value of the identifier propery.
+    #   stock.id
+    #   # => 'AMZN'
+    #
+    # @param [ Symbol ] id The name of the property.
+    #                      Possible values are :isin, :kwn and :symbol
+    #
+    # @return [ Stock ]
+    def self.id(id = nil)
+      unless [nil, :isin, :wkn, :symbol].include?(id)
+        raise ArgumentError, 'Only :isin, :kwn or :symbol are allowed'
+      end
+
+      @id   = id if id
+      @id ||= :isin
+
+      id ? self : @id
+    end
+
+    # Get the value of the identifier propery.
+    #
+    # @return [ Object ]
+    def id
+      return @id if defined? @id
+      id    = public_send(self.class.id)
+      @id ||= id.to_s if id
+    end
+
     # Availability of the stock on cortal consors.
     #
     # @return [ Boolean ] A true value means available on that platform.
     def available?
-      data && isin
+      data && id && !id.empty?
     end
 
     # Basic properties of a finance security like the ISIN for ticker symbol.

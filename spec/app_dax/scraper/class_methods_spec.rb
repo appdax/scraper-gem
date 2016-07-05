@@ -317,7 +317,7 @@ RSpec.describe AppDax::Scraper do
         File.write 'config/scrape.yml', '{}'
       end
 
-      it { expect { load_config.call }.to raise_error }
+      it { expect { load_config.call }.to raise_error RuntimeError }
     end
 
     context 'when file and role exist' do
