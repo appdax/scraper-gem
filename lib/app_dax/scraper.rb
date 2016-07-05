@@ -32,7 +32,7 @@ module AppDax
     def initialize
       @hydra      = Typhoeus::Hydra.new
       @serializer = serializer_class.new
-      @isins      = Set.new
+      @stock_ids  = Set.new
     end
 
     # Run the hydra with the given ISIN numbers to scrape their data.
@@ -97,7 +97,7 @@ module AppDax
         next unless stock.available?
 
         save_stock_as_json(stock)
-        @isins << stock.isin
+        @stock_ids << stock.id
       end
     end
 
