@@ -68,10 +68,10 @@ module AppDax
       def run_hydra(isins, fields)
         isins.each_slice(stocks_per_request) { |stocks| scrape stocks, fields }
 
-        @count = 0
+        @isins.clear
         @hydra.run
 
-        @count
+        @isins.count
       end
 
       # Kill all child processes and wait for their exit to avoid zombies.

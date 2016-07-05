@@ -21,7 +21,8 @@ end
 
 class SpecStock < AppDax::Stock
   def isin
-    'DE12345678'
+    @@counter ||= 0
+    @@counter += 1
   end
 
   def my_partial

@@ -3,6 +3,7 @@ require 'app_dax/scraper/gear'
 require 'securerandom'
 require 'forwardable'
 require 'typhoeus'
+require 'set'
 
 module AppDax
   # To scrape all data about a stock from consorsbank.de the Scraper class takes
@@ -31,7 +32,7 @@ module AppDax
     def initialize
       @hydra      = Typhoeus::Hydra.new
       @serializer = serializer_class.new
-      @counter    = 0
+      @isins      = Set.new
     end
 
     # Run the hydra with the given ISIN numbers to scrape their data.
@@ -96,7 +97,7 @@ module AppDax
         next unless stock.available?
 
         save_stock_as_json(stock)
-        @count += 1
+        @isins << stock.isin
       end
     end
 
