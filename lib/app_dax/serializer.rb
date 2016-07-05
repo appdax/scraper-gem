@@ -6,7 +6,7 @@ require 'time'
 module AppDax
   # JSON serializer for stock class. The serializer goes through all feeds,
   # generates their content and serializes them to one JSON encoded string.
-  # If a feed is empty because mayve the partial isn't available then it will
+  # If a feed is empty because maybe the partial isn't available then it will
   # not be included.
   class Serializer
     extend Forwardable
@@ -97,6 +97,7 @@ module AppDax
         country: stock.country,
         branch: stock.branch,
         sector: stock.sector,
+        symbol: stock.symbol,
         type: 1 }.delete_if { |_, v| v.nil? }
     end
   end

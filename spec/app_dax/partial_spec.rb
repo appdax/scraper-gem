@@ -15,7 +15,7 @@ RSpec.describe AppDax::Partial do
     end
 
     context 'when data is provided' do
-      let(:data) { { k: 'v'} }
+      let(:data) { { k: 'v' } }
       it { is_expected.to be_truthy }
     end
   end
