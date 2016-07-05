@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'app_dax/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'scraper'
+  spec.name          = 'appdax-scraper'
   spec.version       = AppDax::VERSION
   spec.authors       = ['Sebastián Katzer']
   spec.email         = ['katzer.sebastian@googlemail.com']
