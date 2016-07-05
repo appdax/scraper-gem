@@ -92,7 +92,7 @@ module AppDax
       data = [data] unless data.is_a? Array
 
       data.each do |json|
-        stock = stock_class.new(json, res.effective_url)
+        stock = stock_class.new(json, res.effective_url.to_s)
 
         next unless stock.available?
 
