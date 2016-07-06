@@ -33,5 +33,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry-nav'
 
   spec.add_runtime_dependency 'typhoeus', '~> 1.0'
-  spec.add_runtime_dependency 'json'
+  spec.add_runtime_dependency 'json', '~> 2.0'
 end
