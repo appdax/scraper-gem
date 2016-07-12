@@ -168,33 +168,33 @@ RSpec.describe AppDax::Scraper do
     end
   end
 
-  describe '::process_timeout' do
+  describe '::request_timeout' do
     let(:value) { 2 }
 
     it('should have a default value') do
-      expect(described_class.process_timeout).to be > 0
+      expect(described_class.request_timeout).to be > 0
     end
 
     context 'when setting a valid value' do
-      subject { described_class.process_timeout value }
+      subject { described_class.request_timeout value }
       it('should return self') { is_expected.to be(described_class) }
     end
 
     context 'when setting a float value' do
-      before { described_class.process_timeout 1.2 }
-      subject { described_class.process_timeout }
+      before { described_class.request_timeout 1.2 }
+      subject { described_class.request_timeout }
       it('should return an int value') { is_expected.to be_a(Fixnum) }
     end
 
     context 'when setting an invalid value' do
-      before { described_class.process_timeout 0 }
-      subject { described_class.process_timeout }
+      before { described_class.request_timeout 0 }
+      subject { described_class.request_timeout }
       it('should not accept it') { is_expected.to_not eq(0) }
     end
 
     context 'when getting the value' do
-      before { described_class.process_timeout value }
-      subject { described_class.process_timeout }
+      before { described_class.request_timeout value }
+      subject { described_class.request_timeout }
       it('should return it') { is_expected.to eq(value) }
     end
   end
@@ -337,6 +337,29 @@ RSpec.describe AppDax::Scraper do
           it('should return them') { is_expected.to eq([:f1]) }
         end
       end
+    end
+  end
+
+  describe '::proxies' do
+    require 'hidemyass'
+    let!(:proxy) { HideMyAss::Proxy.new(nil) }
+    let!(:url) { 'http://1.1.1.1:80' }
+    subject { described_class.proxies }
+
+    before do
+      allow(proxy).to receive(:url).and_return(url)
+      allow(HideMyAss).to receive(:proxies).and_return([proxy])
+      allow(HideMyAss).to receive(:proxies!).and_return([proxy])
+    end
+
+    context 'when using proxy URLs' do
+      before { described_class.use_proxies true }
+      it('retuns proxies') { is_expected.to eq([url]) }
+    end
+
+    context 'when disabling proxies' do
+      before { described_class.use_proxies false }
+      it('retuns no proxies') { is_expected.to be_empty }
     end
   end
 end

@@ -143,27 +143,26 @@ module AppDax
         count ? self : @parallel
       end
 
-      # Accessor for the `process_timeout` property to specify the maximum
-      # amount of seconds to wait for a forked child process before being
-      # killed.
+      # Accessor for the `request_timeout` property to specify the maximum
+      # amount of seconds to wait for a response.
       #
       # @example Setter
-      #   process_timeout 30
+      #   request_timeout 30
       #   # => self
       #
       # @example Getter
-      #   process_timeout
+      #   request_timeout
       #   # => 30
       #
       # @param [ Int ] count Optional Timeout in seconds.
-      #                      Defaults to 20.
+      #                      Defaults to 30.
       #
       # @return [ Scraper ]
-      def process_timeout(count = nil)
-        @process_timeout   = count.to_i if count && count.to_i >= 1
-        @process_timeout ||= config[:process_timeout] || 20
+      def request_timeout(count = nil)
+        @timeout   = count.to_i if count && count.to_i >= 1
+        @timeout ||= config[:request_timeout] || 30
 
-        count ? self : @process_timeout
+        count ? self : @timeout
       end
 
       # Accessor for the `base_url` property to specify the prefix for all URIs.
@@ -254,6 +253,37 @@ module AppDax
       # @return [ Hash ]
       def url_specs
         (@url_specs ||= {}).dup
+      end
+
+      # Specify the use and list of proxies.
+      #
+      # @example Disable the use of proxies.
+      #   use_proxies false
+      #
+      # @example Use proxies located in Europe.
+      #   use_proxies true, 'c[]' => 'EUROPE'
+      #
+      # @param [ Boolean ] use Set to true to use proxies.
+      #                        Defaults to: true
+      #
+      # @param [ Hash ] filter Optional filter params.
+      #
+      # @return [ Void ]
+      def use_proxies(use = true, filter = nil, &block)
+        require 'hidemyass'
+
+        list     = use ? HideMyAss.proxies!(filter) : []
+        list     = list.instance_exec(&block) if block_given?
+        @proxies = list.map(&:url)
+
+        self
+      end
+
+      # List of proxies to use for.
+      #
+      # @return [ Array<String> ]
+      def proxies
+        defined?(@proxies) ? @proxies.dup : []
       end
 
       # Load the config provided under config/scrape.yml for the specified role.

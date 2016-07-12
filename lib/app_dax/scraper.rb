@@ -21,8 +21,8 @@ module AppDax
     extend Forwardable
     include Gear
 
-    delegate %w(fields drop_box stocks_per_request content_type
-                base_url process_timeout concurrent_requests config
+    delegate %w(fields drop_box stocks_per_request content_type config
+                base_url process_timeout concurrent_requests request_timeout
                 parallel_requests serializer_class stock_class) => 'self.class'
 
     # Intialize the scraper and create the hydra and serializer
@@ -51,9 +51,8 @@ module AppDax
 
       return 0 if isins.empty?
 
-      pids, *pipes = run_gear(isins, fields)
+      *pipes = run_gear(isins, fields)
 
-      wait_for(pids)
       sum_scraped_stocks(*pipes)
     end
 
@@ -73,11 +72,7 @@ module AppDax
     def scrape(isins, fields)
       urls = urls_for(isins, fields)
 
-      urls.each do |url|
-        req = Typhoeus::Request.new(url)
-        req.on_complete(&method(:on_complete))
-        @hydra.queue(req)
-      end
+      urls.each { |url| @hydra.queue request_for(url) }
     end
 
     # Callback of the `scrape` method once the request is complete.
@@ -111,6 +106,13 @@ module AppDax
       File.write(filepath, json) if json
     end
 
+    # Infinite loop back enumerator for all proxies.
+    #
+    # @return [ Enumerator ]
+    def proxies
+      @proxies ||= self.class.proxies.shuffle.to_enum.cycle
+    end
+
     protected
 
     # Parses the response body to an array of raw stock data.
@@ -129,6 +131,21 @@ module AppDax
       else
         [res.body]
       end
+    end
+
+    # Build request for given URL by setting timeouts,
+    # callback and proxy config.
+    #
+    # @param [ String ] url The URL of the request to build for.
+    #
+    # @return [ Typhoeus::Request ]
+    def request_for(url)
+      req = Typhoeus::Request.new url, timeout: request_timeout, headers: { 'Proxy-Connection' => 'close', Connection: 'close' }
+
+      req.options[:proxy] = proxies.next if proxies.any?
+      req.on_complete(&method(:on_complete))
+
+      req
     end
 
     # Build url to request the content of the specified fields of the stock.
@@ -191,7 +208,7 @@ module AppDax
     #
     # @return [ String ] A filename of a JSON file.
     def filename_for(stock)
-      "#{stock.id}-#{SecureRandom.uuid}.json"
+      "#{stock.id.gsub /[\x00-\x1F\/\\:\*\?\"<>\|]/u, ''}-#{SecureRandom.uuid}.json"
     end
   end
 end

@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Sebastián Katzer']
   spec.email         = ['katzer.sebastian@googlemail.com']
 
-  spec.summary       = 'Gem to scrape webpages'
+  spec.summary       = 'Gem to build scrapers'
   spec.homepage      = 'https://github.com/appdax/scraper-gem.git'
   spec.license       = 'GNU GPLv3'
 
@@ -34,4 +34,5 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'typhoeus', '~> 1.0'
   spec.add_runtime_dependency 'json', '~> 2.0'
+  spec.add_runtime_dependency 'hidemyass2', '~> 1.1'
 end

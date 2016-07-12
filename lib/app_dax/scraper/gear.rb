@@ -12,21 +12,19 @@ module AppDax
       # @param [ Array<String> ] isins List of ISIN numbers.
       # @param [ Array<Symbol> ] fields: Subset of Scraper::FIELDS.
       #
-      # @return [ Array<Int>, IO, IO ] List of pids and IO pipes.
+      # @return [ IO, IO ] Read and write pipes
       def run_gear(isins, fields)
-        forks  = []
         rd, wr = IO.pipe
 
-        isins.each_slice(concurrent_requests) do |subset|
+        in_groups_of(parallel_requests, isins).each do |subset|
           if parallel_requests == 1
             wr.puts run_hydra(subset, fields)
           else
-            forks << fork { wr.puts run_hydra(subset, fields) }
-            wait_for(forks) if forks.count % parallel_requests == 0
+            fork { wr.puts run_hydra(subset, fields) }
           end
         end
 
-        [forks, rd, wr]
+        [rd, wr]
       end
 
       protected
@@ -44,19 +42,6 @@ module AppDax
         rd.close
       end
 
-      # Wait for finished execution of all forks, but not more then the
-      # specified timeout in seconds in total.
-      #
-      # @param [ Array<Int> ] forks List of process pids.
-      # @param [ Int ] timeout: Total time in seconds to wait for.
-      #
-      # @return [ Void ]
-      def wait_for(forks, timeout: process_timeout)
-        Timeout.timeout(timeout) { Process.waitall }
-      rescue Timeout::Error
-        kill_forks(forks)
-      end
-
       private
 
       # Run the hydra for the given set of ISINs.
@@ -69,25 +54,23 @@ module AppDax
         isins.each_slice(stocks_per_request) { |stocks| scrape stocks, fields }
 
         @stock_ids.clear
+        @hydra.max_concurrency = concurrent_requests / parallel_requests
         @hydra.run
 
         @stock_ids.count
       end
 
-      # Kill all child processes and wait for their exit to avoid zombies.
+      # Splits an enumerable object into n groups.
       #
-      # @param [ Array<Int> ] pids Process PID numbers to kill.
+      # @param [ Int ] count The number of groups.
+      # @param [ Enumerable ] enum The enumerable object like an array.
       #
-      # @return [ Void ]
-      def kill_forks(pids)
-        pids.each do |pid|
-          begin
-            Process.kill('INT', pid)
-            Process.wait(pid)
-          rescue Errno::ESRCH, Errno::ECHILD
-            nil
-          end
-        end
+      # @return [ Enumerator ]
+      def in_groups_of(count, enum)
+        division = enum.size.div count
+        modulo   = enum.size % count
+
+        enum.each_slice(division + modulo)
       end
     end
 
