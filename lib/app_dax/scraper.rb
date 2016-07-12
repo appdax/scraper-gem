@@ -140,7 +140,7 @@ module AppDax
     #
     # @return [ Typhoeus::Request ]
     def request_for(url)
-      req = Typhoeus::Request.new url, timeout: request_timeout, headers: { 'Proxy-Connection' => 'close', Connection: 'close' }
+      req = Typhoeus::Request.new url, timeout: request_timeout
 
       req.options[:proxy] = proxies.next if proxies.any?
       req.on_complete(&method(:on_complete))
@@ -208,7 +208,7 @@ module AppDax
     #
     # @return [ String ] A filename of a JSON file.
     def filename_for(stock)
-      "#{stock.id.gsub /[\x00-\x1F\/\\:\*\?\"<>\|]/u, ''}-#{SecureRandom.uuid}.json"
+      "#{stock.id.delete('/')}-#{SecureRandom.uuid}.json"
     end
   end
 end
