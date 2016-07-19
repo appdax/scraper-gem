@@ -266,14 +266,13 @@ module AppDax
       # @param [ Boolean ] use Set to true to use proxies.
       #                        Defaults to: true
       #
-      # @param [ Hash ] filter Optional filter params.
+      # @param [ Proc ] block Optional filter selector.
       #
       # @return [ Void ]
-      def use_proxies(use = true, filter = nil, &block)
+      def use_proxies(use = true, &block)
         require 'hidemyass'
 
-        list     = use ? HideMyAss.proxies!(filter) : []
-        list     = list.instance_exec(&block) if block_given?
+        list     = use ? HideMyAss.proxies!(&block) : []
         @proxies = list.map(&:url)
 
         self

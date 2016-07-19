@@ -342,8 +342,11 @@ RSpec.describe AppDax::Scraper do
 
   describe '::proxies' do
     require 'hidemyass'
-    let!(:proxy) { HideMyAss::Proxy.new(nil) }
+    require 'hidemyass/proxy/base'
+
+    let!(:proxy) { HideMyAss::Proxy::Base.new(nil) }
     let!(:url) { 'http://1.1.1.1:80' }
+
     subject { described_class.proxies }
 
     before do
